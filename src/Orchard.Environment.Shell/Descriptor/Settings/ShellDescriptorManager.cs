@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using YesSql.Core.Services;
 using Orchard.Events;
+using System.Threading.Tasks;
 
 namespace Orchard.Environment.Shell.Descriptor.Settings
 {
@@ -27,14 +28,14 @@ namespace Orchard.Environment.Shell.Descriptor.Settings
             _logger = logger;
         }
 
-        public ShellDescriptor GetShellDescriptor()
+        public Task<ShellDescriptor> GetShellDescriptor()
         {
-            return _session.QueryAsync<ShellDescriptor>().FirstOrDefault().Result;
+            return _session.QueryAsync<ShellDescriptor>().FirstOrDefault();
         }
 
-        public async void UpdateShellDescriptor(int priorSerialNumber, IEnumerable<ShellFeature> enabledFeatures, IEnumerable<ShellParameter> parameters)
+        public async Task UpdateShellDescriptor(int priorSerialNumber, IEnumerable<ShellFeature> enabledFeatures, IEnumerable<ShellParameter> parameters)
         {
-            var shellDescriptorRecord = GetShellDescriptor();
+            var shellDescriptorRecord = await GetShellDescriptor();
             var serialNumber = shellDescriptorRecord == null ? 0 : shellDescriptorRecord.SerialNumber;
             if (priorSerialNumber != serialNumber)
             {
@@ -81,7 +82,6 @@ namespace Orchard.Environment.Shell.Descriptor.Settings
             }
             if (_logger.IsEnabled(LogLevel.Information))
             {
-
                 _logger.LogInformation("Shell descriptor updated for shell '{0}'.", _shellSettings.Name);
             }
 

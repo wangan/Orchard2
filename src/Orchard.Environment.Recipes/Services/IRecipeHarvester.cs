@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Orchard.Environment.Recipes.Models;
 using Orchard.DependencyInjection;
+using System.Threading.Tasks;
 
 namespace Orchard.Environment.Recipes.Services
 {
@@ -11,12 +12,12 @@ namespace Orchard.Environment.Recipes.Services
         /// <summary>
         /// Returns a collection of all recipes.
         /// </summary>
-        IEnumerable<Recipe> HarvestRecipes();
+        Task<IEnumerable<Recipe>> HarvestRecipesAsync();
 
         /// <summary>
         /// Returns a collection of all recipes found in the specified extension.
         /// </summary>
-        IEnumerable<Recipe> HarvestRecipes(string extensionId);
+        Task<IEnumerable<Recipe>> HarvestRecipesAsync(string extensionId);
     }
 
     public static class RecipeHarvesterExtensions

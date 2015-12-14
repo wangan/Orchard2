@@ -1,10 +1,11 @@
 ﻿using Orchard.DependencyInjection;
 using Orchard.Environment.Recipes.Models;
+using System.Threading.Tasks;
 
 namespace Orchard.Environment.Recipes.Services
 {
     public interface IRecipeManager : IDependency
     {
-        string Execute(Recipe recipe);
+        Task<string> ExecuteAsync(Recipe recipe);
     }
 }

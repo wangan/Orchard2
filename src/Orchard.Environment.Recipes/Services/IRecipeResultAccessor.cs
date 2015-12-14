@@ -1,5 +1,6 @@
 ﻿using Orchard.DependencyInjection;
 using Orchard.Environment.Recipes.Models;
+using System.Threading.Tasks;
 
 namespace Orchard.Environment.Recipes.Services
 {
@@ -8,6 +9,6 @@ namespace Orchard.Environment.Recipes.Services
     /// </summary>
     public interface IRecipeResultAccessor : IDependency
     {
-        RecipeResult GetResult(string executionId);
+        Task<RecipeResult> GetResultAsync(string executionId);
     }
 }
