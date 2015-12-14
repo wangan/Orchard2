@@ -1,7 +1,7 @@
-﻿using Orchard.Environment.Recipes.Models;
-using Microsoft.Extensions.Localization;
-using Orchard.DependencyInjection;
+﻿using Microsoft.Extensions.Localization;
 using Orchard.ContentManagement;
+using Orchard.DependencyInjection;
+using Orchard.Environment.Recipes.Models;
 
 namespace Orchard.Environment.Recipes.Services
 {

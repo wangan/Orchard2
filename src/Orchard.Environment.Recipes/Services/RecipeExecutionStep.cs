@@ -12,9 +12,9 @@ namespace Orchard.Environment.Recipes.Services
     {
         private readonly ILogger _logger;
 
-        public RecipeExecutionStep(ILoggerFactory loggerFactory)
+        public RecipeExecutionStep(ILogger<RecipeExecutionStep> logger)
         {
-            _logger = loggerFactory.CreateLogger(GetType().Name);
+            _logger = logger;
             T = NullLocalizer.Instance;
         }
 

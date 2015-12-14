@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace Orchard.Environment.Recipes.Models
+﻿namespace Orchard.Environment.Recipes.Models
 {
     public class RecipeStepResult
     {

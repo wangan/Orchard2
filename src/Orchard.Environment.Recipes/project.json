@@ -2,6 +2,7 @@
   "version": "2.0.0-*",
   "dependencies": {
     "Microsoft.Extensions.Logging.Abstractions": "1.0.0-*",
+    "Newtonsoft.Json": "7.0.1",
     "Orchard.ContentManagement.Abstractions": "2.0.0-*",
     "Orchard.DependencyInjection": "2.0.0-*",
     "Orchard.Environment.Shell.Abstractions": "2.0.0-*"
@@ -11,11 +12,7 @@
     "warningsAsErrors": true
   },
   "frameworks": {
-    "dnxcore50": {
-      "dependencies": {
-        "System.Xml.XDocument": "4.0.11-*"
-      }
-    }
+    "dnxcore50": { }
   },
   "repository": {
     "type": "git",
