@@ -4,35 +4,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using YesSql.Core.Services;
+using Orchard.Events;
 
 namespace Orchard.Environment.Shell.Descriptor.Settings
 {
     public class ShellDescriptorManager : IShellDescriptorManager
     {
         private readonly ShellSettings _shellSettings;
-        //private readonly IEventNotifier _eventNotifier;
+        private readonly IEventBus _eventBus;
         private readonly ISession _session;
         private readonly ILogger _logger;
 
         public ShellDescriptorManager(
             ShellSettings shellSettings,
-            //IEventNotifier eventNotifier,
+            IEventBus eventBus,
             ISession session,
             ILogger<ShellDescriptorManager> logger)
         {
             _shellSettings = shellSettings;
-            //_eventNotifier = eventNotifier;
+            _eventBus = eventBus;
             _session = session;
             _logger = logger;
         }
 
         public ShellDescriptor GetShellDescriptor()
         {
-            // TODO: Load shell descriptor from database
-            return null;
+            return _session.QueryAsync<ShellDescriptor>().FirstOrDefault().Result;
         }
 
-        public void UpdateShellDescriptor(int priorSerialNumber, IEnumerable<ShellFeature> enabledFeatures, IEnumerable<ShellParameter> parameters)
+        public async void UpdateShellDescriptor(int priorSerialNumber, IEnumerable<ShellFeature> enabledFeatures, IEnumerable<ShellParameter> parameters)
         {
             var shellDescriptorRecord = GetShellDescriptor();
             var serialNumber = shellDescriptorRecord == null ? 0 : shellDescriptorRecord.SerialNumber;
@@ -84,8 +84,9 @@ namespace Orchard.Environment.Shell.Descriptor.Settings
 
                 _logger.LogInformation("Shell descriptor updated for shell '{0}'.", _shellSettings.Name);
             }
-            //_eventNotifier.Notify<IShellDescriptorManagerEventHandler>(
-            //    e => e.Changed(GetShellDescriptorFromRecord(shellDescriptorRecord), _shellSettings.Name));
+
+            await _eventBus.NotifyAsync<IShellDescriptorManagerEventHandler>(
+                e => e.Changed(shellDescriptorRecord, _shellSettings.Name));
         }
     }
 }
