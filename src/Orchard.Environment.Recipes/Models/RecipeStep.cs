@@ -4,7 +4,7 @@ namespace Orchard.Environment.Recipes.Models
 {
     public class RecipeStep
     {
-        public RecipeStep(string id, string recipeName, string name, JObject step)
+        public RecipeStep(string id, string recipeName, string name, JToken step)
         {
             Id = id;
             RecipeName = recipeName;
@@ -15,6 +15,6 @@ namespace Orchard.Environment.Recipes.Models
         public string Id { get; set; }
         public string RecipeName { get; private set; }
         public string Name { get; private set; }
-        public JObject Step { get; private set; }
+        public JToken Step { get; private set; }
     }
 }
