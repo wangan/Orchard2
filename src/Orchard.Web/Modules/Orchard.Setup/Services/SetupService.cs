@@ -1,16 +1,20 @@
+using Microsoft.AspNet.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Orchard.DependencyInjection;
+using Orchard.Environment.Extensions;
+using Orchard.Environment.Recipes.Services;
+using Orchard.Environment.Shell;
+using Orchard.Environment.Shell.Builders;
+using Orchard.Environment.Shell.Descriptor.Models;
+using Orchard.Environment.Shell.Models;
 using Orchard.Hosting;
+using Orchard.Hosting.ShellBuilders;
 using System;
 using System.Linq;
-using Microsoft.AspNet.Http;
-using Orchard.Environment.Extensions;
-using Orchard.Environment.Shell.Descriptor.Models;
-using Orchard.Environment.Shell.Builders;
-using Orchard.Environment.Shell;
-using Orchard.Environment.Shell.Models;
-using Orchard.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Orchard.Hosting.ShellBuilders;
 using YesSql.Core.Services;
+using Orchard.Environment.Recipes.Models;
+using System.Collections.Generic;
 
 namespace Orchard.Setup.Services
 {
@@ -25,7 +29,9 @@ namespace Orchard.Setup.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRunningShellTable _runningShellTable;
         private readonly IRunningShellRouterTable _runningShellRouterTable;
+        private readonly IRecipeHarvester _recipeHarvester;
         private readonly ILogger _logger;
+        private IReadOnlyList<Recipe> _recipes;
 
         public SetupService(
             ShellSettings shellSettings,
@@ -37,6 +43,7 @@ namespace Orchard.Setup.Services
             IHttpContextAccessor httpContextAccessor,
             IRunningShellTable runningShellTable,
             IRunningShellRouterTable runningShellRouterTable,
+            IRecipeHarvester recipeHarvester,
             ILogger<SetupService> logger)
         {
             _shellSettings = shellSettings;
@@ -48,12 +55,24 @@ namespace Orchard.Setup.Services
             _httpContextAccessor = httpContextAccessor;
             _runningShellTable = runningShellTable;
             _runningShellRouterTable = runningShellRouterTable;
+            _recipeHarvester = recipeHarvester;
             _logger = logger;
         }
 
         public ShellSettings Prime()
         {
             return _shellSettings;
+        }
+
+        public IReadOnlyList<Recipe> Recipes()
+        {
+            if (_recipes == null)
+            {
+                var recipes = new List<Recipe>();
+                recipes.AddRange(_recipeHarvester.HarvestRecipesAsync().Result.Where(recipe => recipe.IsSetupRecipe));
+                _recipes = recipes;
+            }
+            return _recipes;
         }
 
         public string Setup(SetupContext context)
@@ -116,7 +135,7 @@ namespace Orchard.Setup.Services
             {
                 executionId = CreateTenantData(context, environment);
 
-                using (var store = (IStore)environment.ServiceProvider.GetService(typeof(IStore)))
+                using (var store = environment.ServiceProvider.GetService<IStore>())
                 {
                     store.InitializeAsync();
                 }
@@ -130,8 +149,9 @@ namespace Orchard.Setup.Services
 
         private string CreateTenantData(SetupContext context, ShellContext shellContext)
         {
-            // Must mark state as Running - otherwise standalone enviro is created "for setup"
-            return Guid.NewGuid().ToString();
+            var recipeManager = shellContext.ServiceProvider.GetService<IRecipeManager>();
+            var recipe = context.Recipe;
+            return recipeManager.ExecuteAsync(recipe).Result;
         }
     }
 }

@@ -4,6 +4,7 @@ using Orchard.Environment.Shell;
 using Orchard.Setup.Services;
 using Orchard.Setup.ViewModels;
 using System;
+using System.Linq;
 
 namespace Orchard.Setup.Controllers
 {
@@ -31,8 +32,19 @@ namespace Orchard.Setup.Controllers
 
         public ActionResult Index()
         {
+            var initialSettings = _setupService.Prime();
+            var recipes = _setupService.Recipes();
+            string recipeDescription = null;
+
+            if (recipes.Any())
+            {
+                recipeDescription = recipes[0].Description;
+            }
+
             return IndexViewResult(new SetupViewModel
             {
+                Recipes = recipes,
+                RecipeDescription = recipeDescription
             });
         }
 
