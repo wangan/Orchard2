@@ -1,5 +1,4 @@
 ﻿using Orchard.DependencyInjection;
-using Orchard.Recipes.Models;
 using YesSql.Core.Indexes;
 
 namespace Orchard.Recipes.Records

@@ -62,7 +62,7 @@ namespace Orchard.Recipes.Services
 
                 foreach (var recipeStep in recipe.RecipeSteps)
                 {
-                    ExecuteRecipeStep(executionId, recipe, recipeStep);
+                    ExecuteRecipeStep(executionId, recipeStep);
                 }
                 _recipeScheduler.ScheduleWork(executionId);
 
