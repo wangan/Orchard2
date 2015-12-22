@@ -1,6 +1,7 @@
 ﻿using System;
 using Orchard.Environment.Shell.Builders.Models;
 using Orchard.Environment.Shell;
+using Orchard.Environment.Shell.Descriptor.Models;
 
 namespace Orchard.Hosting.ShellBuilders
 {

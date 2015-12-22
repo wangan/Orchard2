@@ -13,6 +13,7 @@ namespace Orchard.Recipes.Providers.RecipeHandlers
     {
         private readonly IEnumerable<IRecipeExecutionStep> _recipeExecutionSteps;
         private readonly ILogger _logger;
+
         public RecipeExecutionStepHandler(IEnumerable<IRecipeExecutionStep> recipeExecutionSteps,
             ILogger<RecipeExecutionStepHandler> logger)
         {
