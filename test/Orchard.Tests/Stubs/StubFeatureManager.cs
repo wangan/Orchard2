@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Orchard.Environment.Extensions.Models;
+using System.Threading.Tasks;
 
 namespace Orchard.Tests.Stubs
 {
@@ -20,42 +21,42 @@ namespace Orchard.Tests.Stubs
             }
         }
 
-        public IEnumerable<string> DisableFeatures(IEnumerable<string> featureIds)
+        public Task<IEnumerable<string>> DisableFeatures(IEnumerable<string> featureIds)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<string> DisableFeatures(IEnumerable<string> featureIds, bool force)
+        public Task<IEnumerable<string>> DisableFeatures(IEnumerable<string> featureIds, bool force)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<string> EnableFeatures(IEnumerable<string> featureIds)
+        public Task<IEnumerable<string>> EnableFeatures(IEnumerable<string> featureIds)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<string> EnableFeatures(IEnumerable<string> featureIds, bool force)
+        public Task<IEnumerable<string>> EnableFeatures(IEnumerable<string> featureIds, bool force)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<FeatureDescriptor> GetAvailableFeatures()
+        public Task<IEnumerable<FeatureDescriptor>> GetAvailableFeatures()
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<string> GetDependentFeatures(string featureId)
+        public Task<IEnumerable<string>> GetDependentFeatures(string featureId)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<FeatureDescriptor> GetDisabledFeatures()
+        public Task<IEnumerable<FeatureDescriptor>> GetDisabledFeatures()
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<FeatureDescriptor> GetEnabledFeatures()
+        public Task<IEnumerable<FeatureDescriptor>> GetEnabledFeatures()
         {
             throw new NotImplementedException();
         }

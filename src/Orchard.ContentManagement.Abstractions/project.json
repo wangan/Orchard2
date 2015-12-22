@@ -2,6 +2,9 @@
   "version": "2.0.0-*",
   "dependencies": {
     "Microsoft.Extensions.Localization.Abstractions": "1.0.0-*"
+    "Orchard.Environment.Recipes": "2.0.0-*"
+    "Orchard.Environment.Commands": "2.0.0-*",
+    "Orchard.FileSystem.Web": "2.0.0-*"
   },
   "compilationOptions": {
     "define": [ "TRACE" ],

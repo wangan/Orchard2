@@ -6,6 +6,7 @@ using Orchard.Environment.Shell.Descriptor.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Orchard.Environment.Extensions.Features
 {
@@ -38,18 +39,18 @@ namespace Orchard.Environment.Extensions.Features
         /// Retrieves the available features.
         /// </summary>
         /// <returns>An enumeration of feature descriptors for the available features.</returns>
-        public IEnumerable<FeatureDescriptor> GetAvailableFeatures()
+        public async Task<IEnumerable<FeatureDescriptor>> GetAvailableFeatures()
         {
-            return _extensionManager.AvailableFeatures();
+            return await Task.FromResult(_extensionManager.AvailableFeatures());
         }
 
         /// <summary>
         /// Retrieves the enabled features.
         /// </summary>
         /// <returns>An enumeration of feature descriptors for the enabled features.</returns>
-        public IEnumerable<FeatureDescriptor> GetEnabledFeatures()
+        public async Task<IEnumerable<FeatureDescriptor>> GetEnabledFeatures()
         {
-            var currentShellDescriptor = _shellDescriptorManager.GetShellDescriptor().Result;
+            var currentShellDescriptor = await _shellDescriptorManager.GetShellDescriptor();
             return _extensionManager.EnabledFeatures(currentShellDescriptor);
         }
 
@@ -57,9 +58,9 @@ namespace Orchard.Environment.Extensions.Features
         /// Retrieves the disabled features.
         /// </summary>
         /// <returns>An enumeration of feature descriptors for the disabled features.</returns>
-        public IEnumerable<FeatureDescriptor> GetDisabledFeatures()
+        public async Task<IEnumerable<FeatureDescriptor>> GetDisabledFeatures()
         {
-            var currentShellDescriptor = _shellDescriptorManager.GetShellDescriptor().Result;
+            var currentShellDescriptor = await _shellDescriptorManager.GetShellDescriptor();
             return _extensionManager.DisabledFeatures(currentShellDescriptor);
         }
 
@@ -67,7 +68,7 @@ namespace Orchard.Environment.Extensions.Features
         /// Enables a list of features.
         /// </summary>
         /// <param name="featureIds">The IDs for the features to be enabled.</param>
-        public IEnumerable<string> EnableFeatures(IEnumerable<string> featureIds)
+        public Task<IEnumerable<string>> EnableFeatures(IEnumerable<string> featureIds)
         {
             return EnableFeatures(featureIds, false);
         }
@@ -77,12 +78,12 @@ namespace Orchard.Environment.Extensions.Features
         /// </summary>
         /// <param name="featureIds">The IDs for the features to be enabled.</param>
         /// <param name="force">Boolean parameter indicating if the feature should enable it's dependencies if required or fail otherwise.</param>
-        public IEnumerable<string> EnableFeatures(IEnumerable<string> featureIds, bool force)
+        public async Task<IEnumerable<string>> EnableFeatures(IEnumerable<string> featureIds, bool force)
         {
-            ShellDescriptor shellDescriptor = _shellDescriptorManager.GetShellDescriptor().Result;
+            ShellDescriptor shellDescriptor = await _shellDescriptorManager.GetShellDescriptor();
             List<ShellFeature> enabledFeatures = shellDescriptor.Features.ToList();
 
-            IDictionary<FeatureDescriptor, bool> availableFeatures = GetAvailableFeatures()
+            IDictionary<FeatureDescriptor, bool> availableFeatures = GetAvailableFeatures().Result
                 .ToDictionary(featureDescriptor => featureDescriptor,
                                 featureDescriptor => enabledFeatures.FirstOrDefault(shellFeature => shellFeature.Name == featureDescriptor.Id) != null);
 
@@ -90,7 +91,7 @@ namespace Orchard.Environment.Extensions.Features
                 .Select(featureId => EnableFeature(featureId, availableFeatures, force)).ToList()
                 .SelectMany(ies => ies.Select(s => s));
 
-            if (featuresToEnable.Count() > 0)
+            if (featuresToEnable.Any())
             {
                 foreach (string featureId in featuresToEnable)
                 {
@@ -103,7 +104,7 @@ namespace Orchard.Environment.Extensions.Features
                     }
                 }
 
-                _shellDescriptorManager.UpdateShellDescriptor(shellDescriptor.SerialNumber, enabledFeatures,
+                await _shellDescriptorManager.UpdateShellDescriptor(shellDescriptor.SerialNumber, enabledFeatures,
                                                               shellDescriptor.Parameters);
             }
 
@@ -115,9 +116,9 @@ namespace Orchard.Environment.Extensions.Features
         /// </summary>
         /// <param name="featureIds">The IDs for the features to be disabled.</param>
         /// <returns>An enumeration with the disabled feature IDs.</returns>
-        public IEnumerable<string> DisableFeatures(IEnumerable<string> featureIds)
+        public async Task<IEnumerable<string>> DisableFeatures(IEnumerable<string> featureIds)
         {
-            return DisableFeatures(featureIds, false);
+            return await DisableFeatures(featureIds, false);
         }
 
         /// <summary>
@@ -126,9 +127,9 @@ namespace Orchard.Environment.Extensions.Features
         /// <param name="featureIds">The IDs for the features to be disabled.</param>
         /// <param name="force">Boolean parameter indicating if the feature should disable the features which depend on it if required or fail otherwise.</param>
         /// <returns>An enumeration with the disabled feature IDs.</returns>
-        public IEnumerable<string> DisableFeatures(IEnumerable<string> featureIds, bool force)
+        public async Task<IEnumerable<string>> DisableFeatures(IEnumerable<string> featureIds, bool force)
         {
-            ShellDescriptor shellDescriptor = _shellDescriptorManager.GetShellDescriptor().Result;
+            ShellDescriptor shellDescriptor = await _shellDescriptorManager.GetShellDescriptor();
             List<ShellFeature> enabledFeatures = shellDescriptor.Features.ToList();
 
             IEnumerable<string> featuresToDisable = featureIds
@@ -148,7 +149,7 @@ namespace Orchard.Environment.Extensions.Features
                     }
                 }
 
-                _shellDescriptorManager.UpdateShellDescriptor(shellDescriptor.SerialNumber, enabledFeatures,
+                await _shellDescriptorManager.UpdateShellDescriptor(shellDescriptor.SerialNumber, enabledFeatures,
                                                               shellDescriptor.Parameters);
             }
 
@@ -160,7 +161,7 @@ namespace Orchard.Environment.Extensions.Features
         /// </summary>
         /// <param name="featureId">ID of the feature to check.</param>
         /// <returns>An enumeration with dependent feature IDs.</returns>
-        public IEnumerable<string> GetDependentFeatures(string featureId)
+        public async Task<IEnumerable<string>> GetDependentFeatures(string featureId)
         {
             var getEnabledDependants =
                 new Func<string, IDictionary<FeatureDescriptor, bool>, IDictionary<FeatureDescriptor, bool>>(
@@ -170,10 +171,10 @@ namespace Orchard.Environment.Extensions.Features
                             .Contains(currentFeatureId.ToLowerInvariant()))
                         .ToDictionary(f => f.Key, f => f.Value));
 
-            ShellDescriptor shellDescriptor = _shellDescriptorManager.GetShellDescriptor().Result;
+            ShellDescriptor shellDescriptor = await _shellDescriptorManager.GetShellDescriptor();
             List<ShellFeature> enabledFeatures = shellDescriptor.Features.ToList();
 
-            IDictionary<FeatureDescriptor, bool> availableFeatures = GetAvailableFeatures()
+            IDictionary<FeatureDescriptor, bool> availableFeatures = (await GetAvailableFeatures())
                 .ToDictionary(featureDescriptor => featureDescriptor,
                               featureDescriptor => enabledFeatures.FirstOrDefault(shellFeature => shellFeature.Name.Equals(featureDescriptor.Id)) != null);
 
@@ -243,7 +244,7 @@ namespace Orchard.Environment.Extensions.Features
         /// <returns>An enumeration of the disabled features.</returns>
         private IEnumerable<string> DisableFeature(string featureId, bool force)
         {
-            IEnumerable<string> featuresToDisable = GetDependentFeatures(featureId);
+            IEnumerable<string> featuresToDisable = GetDependentFeatures(featureId).Result;
 
             if (featuresToDisable.Count() > 1 && !force)
             {
