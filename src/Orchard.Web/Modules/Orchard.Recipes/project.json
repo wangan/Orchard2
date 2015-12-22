@@ -5,6 +5,7 @@
     "Orchard.ContentManagement": "2.0.0-*",
     "Orchard.Environment.Commands": "2.0.0-*",
     "Orchard.Environment.Recipes": "2.0.0-*",
+    "Orchard.Environment.Shell": "2.0.0-*",
     "Orchard.Hosting.Web": "2.0.0-*"
   },
   "compilationOptions": {

@@ -1,8 +1,11 @@
 using Microsoft.AspNet.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Orchard.DependencyInjection;
 using Orchard.Environment.Extensions;
+using Orchard.Environment.Recipes.Models;
 using Orchard.Environment.Recipes.Services;
 using Orchard.Environment.Shell;
 using Orchard.Environment.Shell.Builders;
@@ -11,10 +14,9 @@ using Orchard.Environment.Shell.Models;
 using Orchard.Hosting;
 using Orchard.Hosting.ShellBuilders;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using YesSql.Core.Services;
-using Orchard.Environment.Recipes.Models;
-using System.Collections.Generic;
 
 namespace Orchard.Setup.Services
 {
@@ -151,7 +153,23 @@ namespace Orchard.Setup.Services
         {
             var recipeManager = shellContext.ServiceProvider.GetService<IRecipeManager>();
             var recipe = context.Recipe;
-            return recipeManager.ExecuteAsync(recipe).Result;
+            var executionId = recipeManager.ExecuteAsync(recipe).Result;
+
+            // Once the recipe has finished executing, we need to update the shell state to "Running", so add a recipe step that does exactly that.
+            JObject activateShellJSteps = new JObject();
+            JObject activateShellJStep = new JObject();
+            activateShellJStep.Add("name", "ActivateShell");
+            activateShellJSteps.Add("steps", activateShellJStep);
+
+            var activateShellStep = new RecipeStep(
+                Guid.NewGuid().ToString("N"), 
+                recipe.Name, 
+                "ActivateShell",
+                activateShellJSteps);
+
+            recipeManager.ExecuteRecipeStep(executionId, activateShellStep);
+
+            return executionId;
         }
     }
 }

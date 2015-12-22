@@ -68,7 +68,7 @@ namespace Orchard.Setup.Controllers
             var executionId = _setupService.Setup(setupContext);
 
             var urlPrefix = "";
-            if (!String.IsNullOrWhiteSpace(_shellSettings.RequestUrlPrefix))
+            if (!string.IsNullOrWhiteSpace(_shellSettings.RequestUrlPrefix))
             {
                 urlPrefix = _shellSettings.RequestUrlPrefix + "/";
             }
