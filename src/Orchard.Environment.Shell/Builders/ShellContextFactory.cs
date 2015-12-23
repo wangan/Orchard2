@@ -102,6 +102,24 @@ namespace Orchard.Environment.Shell.Builders
             };
         }
 
+        public ShellContext CreateDescribedContext(ShellSettings settings, ShellDescriptor shellDescriptor)
+        {
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug("Creating described context for tenant {0}", settings.Name);
+            }
+
+            var blueprint = _compositionStrategy.Compose(settings, shellDescriptor);
+            var provider = _shellContainerFactory.CreateContainer(settings, blueprint);
+
+            return new ShellContext
+            {
+                Settings = settings,
+                Blueprint = blueprint,
+                ServiceProvider = provider
+            };
+        }
+
         private static ShellDescriptor MinimumShellDescriptor()
         {
             return new ShellDescriptor

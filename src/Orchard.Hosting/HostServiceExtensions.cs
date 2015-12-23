@@ -1,11 +1,12 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
+using Orchard.FileSystem;
 using Orchard.DependencyInjection;
 using Orchard.Environment.Shell;
 using Orchard.Environment.Shell.Builders;
-using Orchard.FileSystem;
-using Orchard.Hosting.Services;
 using Orchard.Services;
-using System;
+using Orchard.Hosting.Services;
+using Orchard.Environment.Shell.State;
 
 namespace Orchard.Hosting
 {
@@ -43,6 +44,9 @@ namespace Orchard.Hosting
                     services.AddSingleton<IShellContainerFactory, ShellContainerFactory>();
                 }
             }
+
+            services.AddSingleton<IProcessingEngine, DefaultProcessingEngine>();
+
             services.AddSingleton<IRunningShellTable, RunningShellTable>();
 
             return services;
