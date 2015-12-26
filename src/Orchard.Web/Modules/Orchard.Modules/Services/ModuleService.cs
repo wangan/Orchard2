@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Orchard.Environment.Extensions;
+using Orchard.Environment.Extensions.Features;
+using Orchard.Environment.Extensions.Models;
+using Orchard.Environment.Shell.Descriptor;
+using Orchard.FileSystem.VirtualPath;
+using Orchard.Localization;
+using Orchard.Modules.Models;
+using Orchard.Notifications;
+using Orchard.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Orchard.Environment.Extensions;
-using Orchard.Environment.Extensions.Models;
-using Orchard.Localization;
-using Orchard.Environment.Extensions.Features;
-using Orchard.Notifications;
-using Orchard.Environment.Shell.Descriptor;
-using Orchard.Modules.Models;
 using System.Threading.Tasks;
-using Orchard.Services;
-using Orchard.FileSystem.VirtualPath;
 
 namespace Orchard.Modules.Services
 {

@@ -30,7 +30,6 @@ namespace Orchard.Recipes.Services
             ISession session,
             ILogger<RecipeManager> logger)
         {
-
             _recipeStepQueue = recipeStepQueue;
             _recipeScheduler = recipeScheduler;
             _eventBus = eventBus;

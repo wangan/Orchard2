@@ -24,18 +24,22 @@ namespace Orchard.Environment.Shell.State
             _defaultValue = defaultValue;
         }
 
-        private readonly AsyncLocal<IDictionary<string, T>> _serviceProvider = new AsyncLocal<IDictionary<string, T>>();
+        private readonly AsyncLocal<IDictionary<string, T>> _serviceProvider =
+            new AsyncLocal<IDictionary<string, T>>();
 
         public T GetState()
         {
-            if (_serviceProvider.Value.ContainsKey(_name))
+            if (_serviceProvider.Value != null)
             {
-                return _serviceProvider.Value[_name];
+                if (_serviceProvider.Value.ContainsKey(_name))
+                {
+                    return _serviceProvider.Value[_name];
+                }
             }
 
             if (_defaultValue != null)
             {
-                _serviceProvider.Value.Add(_name, _defaultValue());
+                SetState(_defaultValue());
                 return _serviceProvider.Value[_name];
             }
 
@@ -44,6 +48,10 @@ namespace Orchard.Environment.Shell.State
 
         public void SetState(T state)
         {
+            if (_serviceProvider.Value == null) {
+                _serviceProvider.Value = new Dictionary<string, T>();
+            }
+
             _serviceProvider.Value.Add(_name, state);
         }
     }

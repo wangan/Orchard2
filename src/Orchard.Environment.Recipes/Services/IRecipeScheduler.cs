@@ -1,8 +1,6 @@
-﻿using Orchard.DependencyInjection;
-
-namespace Orchard.Environment.Recipes.Services
+﻿namespace Orchard.Environment.Recipes.Services
 {
-    public interface IRecipeScheduler : IDependency
+    public interface IRecipeScheduler
     {
         void ScheduleWork(string executionId);
     }

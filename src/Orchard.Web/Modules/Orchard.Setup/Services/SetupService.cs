@@ -3,14 +3,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Orchard.Data.Migration;
 using Orchard.DependencyInjection;
 using Orchard.Environment.Extensions;
 using Orchard.Environment.Recipes.Models;
 using Orchard.Environment.Recipes.Services;
 using Orchard.Environment.Shell;
 using Orchard.Environment.Shell.Builders;
+using Orchard.Environment.Shell.Descriptor;
 using Orchard.Environment.Shell.Descriptor.Models;
 using Orchard.Environment.Shell.Models;
+using Orchard.Environment.Shell.State;
+using Orchard.Events;
 using Orchard.Hosting;
 using Orchard.Hosting.ShellBuilders;
 using System;
@@ -26,12 +30,14 @@ namespace Orchard.Setup.Services
         private readonly IOrchardHost _orchardHost;
         private readonly IShellSettingsManager _shellSettingsManager;
         private readonly IShellContainerFactory _shellContainerFactory;
+        private readonly IShellContextFactory _shellContextFactory;
         private readonly ICompositionStrategy _compositionStrategy;
         private readonly IExtensionManager _extensionManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRunningShellTable _runningShellTable;
         private readonly IRunningShellRouterTable _runningShellRouterTable;
         private readonly IRecipeHarvester _recipeHarvester;
+        private readonly IProcessingEngine _processingEngine;
         private readonly ILogger _logger;
         private IReadOnlyList<Recipe> _recipes;
 
@@ -40,24 +46,28 @@ namespace Orchard.Setup.Services
             IOrchardHost orchardHost,
             IShellSettingsManager shellSettingsManager,
             IShellContainerFactory shellContainerFactory,
+            IShellContextFactory shellContextFactory,
             ICompositionStrategy compositionStrategy,
             IExtensionManager extensionManager,
             IHttpContextAccessor httpContextAccessor,
             IRunningShellTable runningShellTable,
             IRunningShellRouterTable runningShellRouterTable,
             IRecipeHarvester recipeHarvester,
+            IProcessingEngine processingEngine,
             ILogger<SetupService> logger)
         {
             _shellSettings = shellSettings;
             _orchardHost = orchardHost;
             _shellSettingsManager = shellSettingsManager;
             _shellContainerFactory = shellContainerFactory;
+            _shellContextFactory = shellContextFactory;
             _compositionStrategy = compositionStrategy;
             _extensionManager = extensionManager;
             _httpContextAccessor = httpContextAccessor;
             _runningShellTable = runningShellTable;
             _runningShellRouterTable = runningShellRouterTable;
             _recipeHarvester = recipeHarvester;
+            _processingEngine = processingEngine;
             _logger = logger;
         }
 
@@ -105,7 +115,9 @@ namespace Orchard.Setup.Services
                 // Framework
                 "Orchard.Hosting",
                 // Core
-                "Settings"
+                "Settings",
+                // Modules
+                "Orchard.Modules", "Orchard.Recipes"
                 };
 
             context.EnabledFeatures = hardcoded.Union(context.EnabledFeatures ?? Enumerable.Empty<string>()).Distinct().ToList();
@@ -133,14 +145,34 @@ namespace Orchard.Setup.Services
             // In theory this environment can be used to resolve any normal components by interface, and those
             // components will exist entirely in isolation - no crossover between the safemode container currently in effect
 
-            using (var environment = _orchardHost.CreateShellContext(shellSettings))
+            using (var environment = _shellContextFactory.CreateDescribedContext(shellSettings, shellDescriptor))
             {
-                executionId = CreateTenantData(context, environment);
-
                 using (var store = environment.ServiceProvider.GetService<IStore>())
                 {
                     store.InitializeAsync();
                 }
+
+                var dataMigrationManager = environment.ServiceProvider.GetService<IDataMigrationManager>();
+                dataMigrationManager.UpdateAsync("Settings");
+
+                foreach (var feature in context.EnabledFeatures)
+                {
+                    dataMigrationManager.UpdateAsync(feature);
+                }
+
+                environment.ServiceProvider.GetService<IShellDescriptorManager>().UpdateShellDescriptor(
+                    0,
+                    shellDescriptor.Features,
+                    shellDescriptor.Parameters);
+            }
+
+            // In effect "pump messages" see PostMessage circa 1980.
+            while (_processingEngine.AreTasksPending())
+                _processingEngine.ExecuteNextTask();
+
+            using (var environment = _shellContextFactory.CreateShellContext(shellSettings))
+            {
+                executionId = CreateTenantData(context, environment);
             }
 
             shellSettings.State = TenantState.Running;

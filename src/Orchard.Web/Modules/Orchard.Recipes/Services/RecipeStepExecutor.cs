@@ -3,6 +3,7 @@ using Orchard.DependencyInjection;
 using Orchard.Environment.Recipes.Events;
 using Orchard.Environment.Recipes.Models;
 using Orchard.Environment.Recipes.Services;
+using Orchard.Events;
 using Orchard.Recipes.Records;
 using System;
 using System.Collections.Generic;
@@ -14,21 +15,21 @@ namespace Orchard.Recipes.Services
     {
         private readonly IRecipeStepQueue _recipeStepQueue;
         private readonly IEnumerable<IRecipeHandler> _recipeHandlers;
-        private readonly IRecipeExecuteEventHandler _recipeExecuteEventHandler;
+        private readonly IEventBus _eventBus;
         private readonly ISession _session;
         private readonly ILogger _logger;
 
         public RecipeStepExecutor(
             IRecipeStepQueue recipeStepQueue,
             IEnumerable<IRecipeHandler> recipeHandlers,
-            IRecipeExecuteEventHandler recipeExecuteEventHandler,
+            IEventBus eventBus,
             ISession session,
             ILogger<RecipeStepExecutor> logger)
         {
 
             _recipeStepQueue = recipeStepQueue;
             _recipeHandlers = recipeHandlers;
-            _recipeExecuteEventHandler = recipeExecuteEventHandler;
+            _eventBus = eventBus;
             _session = session;
             _logger = logger;
         }
@@ -39,7 +40,7 @@ namespace Orchard.Recipes.Services
             if (nextRecipeStep == null)
             {
                 _logger.LogInformation("No more recipe steps left to execute.");
-                _recipeExecuteEventHandler.ExecutionComplete(executionId);
+                _eventBus.NotifyAsync<IRecipeExecuteEventHandler>(e => e.ExecutionComplete(executionId));
                 return false;
             }
 
@@ -49,7 +50,7 @@ namespace Orchard.Recipes.Services
 
             try
             {
-                _recipeExecuteEventHandler.RecipeStepExecuting(executionId, recipeContext);
+                _eventBus.NotifyAsync<IRecipeExecuteEventHandler>(e => e.RecipeStepExecuting(executionId, recipeContext));
 
                 foreach (var recipeHandler in _recipeHandlers)
                 {
@@ -57,7 +58,7 @@ namespace Orchard.Recipes.Services
                 }
 
                 UpdateStepResultRecord(executionId, nextRecipeStep.RecipeName, nextRecipeStep.Id, nextRecipeStep.Name, isSuccessful: true);
-                _recipeExecuteEventHandler.RecipeStepExecuted(executionId, recipeContext);
+                _eventBus.NotifyAsync<IRecipeExecuteEventHandler>(e => e.RecipeStepExecuted(executionId, recipeContext));
             }
             catch (Exception ex)
             {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Orchard.Environment.Recipes.Services
 {
-    public interface IRecipeHarvester : IDependency
+    public interface IRecipeHarvester
     {
         /// <summary>
         /// Returns a collection of all recipes.

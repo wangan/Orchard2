@@ -2,7 +2,7 @@
 
 namespace Orchard.Environment.Recipes.Services
 {
-    public interface IRecipeStepExecutor : IDependency
+    public interface IRecipeStepExecutor
     {
         bool ExecuteNextStep(string executionId);
     }

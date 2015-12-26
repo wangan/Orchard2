@@ -5,6 +5,7 @@ using Orchard.Setup.Services;
 using Orchard.Setup.ViewModels;
 using System;
 using System.Linq;
+using Orchard.Environment.Recipes.Services;
 
 namespace Orchard.Setup.Controllers
 {
@@ -51,11 +52,31 @@ namespace Orchard.Setup.Controllers
         [HttpPost, ActionName("Index")]
         public ActionResult IndexPOST(SetupViewModel model)
         {
+            var recipes = _setupService.Recipes().ToList();
+
+            if (model.Recipe == null)
+            {
+                if (!(recipes.Select(r => r.Name).Contains(DefaultRecipe)))
+                {
+                    ModelState.AddModelError("Recipe", T("No recipes were found."));
+                }
+                else {
+                    model.Recipe = DefaultRecipe;
+                }
+            }
             if (!ModelState.IsValid)
             {
+                model.Recipes = recipes;
+                foreach (var rec in recipes.Where(r => r.Name == model.Recipe))
+                {
+                    model.RecipeDescription = rec.Description;
+                }
+
                 return IndexViewResult(model);
             }
 
+
+            var recipe = recipes.GetRecipeByName(model.Recipe);
             var setupContext = new SetupContext
             {
                 SiteName = model.SiteName,
@@ -63,6 +84,7 @@ namespace Orchard.Setup.Controllers
                 DatabaseConnectionString = model.ConnectionString,
                 DatabaseTablePrefix = model.TablePrefix,
                 EnabledFeatures = null, // default list
+                Recipe = recipe
             };
 
             var executionId = _setupService.Setup(setupContext);
