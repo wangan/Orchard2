@@ -1,7 +1,6 @@
 using Microsoft.AspNet.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Orchard.Data.Migration;
 using Orchard.DependencyInjection;
@@ -14,7 +13,6 @@ using Orchard.Environment.Shell.Descriptor;
 using Orchard.Environment.Shell.Descriptor.Models;
 using Orchard.Environment.Shell.Models;
 using Orchard.Environment.Shell.State;
-using Orchard.Events;
 using Orchard.Hosting;
 using Orchard.Hosting.ShellBuilders;
 using System;
@@ -112,12 +110,14 @@ namespace Orchard.Setup.Services
 
             // Features to enable for Setup
             string[] hardcoded = {
+                // Logging
+                "Orchard.Logging.Console",
                 // Framework
                 "Orchard.Hosting",
                 // Core
                 "Settings",
                 // Modules
-                "Orchard.Modules", "Orchard.Recipes"
+                "Orchard.Modules", "Orchard.Themes", "Orchard.Recipes"
                 };
 
             context.EnabledFeatures = hardcoded.Union(context.EnabledFeatures ?? Enumerable.Empty<string>()).Distinct().ToList();
@@ -149,9 +149,12 @@ namespace Orchard.Setup.Services
             {
                 using (var store = environment.ServiceProvider.GetService<IStore>())
                 {
-                    store.InitializeAsync();
+                    store.InitializeAsync().Wait();
                 }
+            }
 
+            using (var environment = _shellContextFactory.CreateDescribedContext(shellSettings, shellDescriptor))
+            {
                 var dataMigrationManager = environment.ServiceProvider.GetService<IDataMigrationManager>();
                 dataMigrationManager.UpdateAsync("Settings");
 

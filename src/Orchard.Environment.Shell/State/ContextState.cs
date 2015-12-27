@@ -52,7 +52,13 @@ namespace Orchard.Environment.Shell.State
                 _serviceProvider.Value = new Dictionary<string, T>();
             }
 
-            _serviceProvider.Value.Add(_name, state);
+            if (state == null && _serviceProvider.Value.ContainsKey(_name))
+            {
+                _serviceProvider.Value.Remove(_name);
+            }
+            else {
+                _serviceProvider.Value.Add(_name, state);
+            }
         }
     }
 }

@@ -47,6 +47,7 @@ namespace Orchard.Hosting
                 var scope = shellContext.ServiceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
                 using (scope)
+                using (shellContext)
                 {
                     httpContext.RequestServices = scope.ServiceProvider;
 

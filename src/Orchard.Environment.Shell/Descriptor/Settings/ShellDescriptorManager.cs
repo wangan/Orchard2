@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Orchard.Environment.Shell.Descriptor.Models;
+using Orchard.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using YesSql.Core.Services;
-using Orchard.Events;
 using System.Threading.Tasks;
+using YesSql.Core.Services;
 
 namespace Orchard.Environment.Shell.Descriptor.Settings
 {

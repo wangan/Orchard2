@@ -1,4 +1,5 @@
-﻿using Orchard.DependencyInjection;
+﻿using Orchard.Data.Migration;
+using Orchard.DependencyInjection;
 using YesSql.Core.Indexes;
 
 namespace Orchard.Recipes.Records
@@ -23,6 +24,21 @@ namespace Orchard.Recipes.Records
                     StepName = contentItem.StepName,
                     RecipeName = contentItem.RecipeName
                 });
+        }
+    }
+
+    public class Migrations : DataMigrations
+    {
+        public int Create()
+        {
+            SchemaBuilder.CreateMapIndexTable(nameof(RecipeStepResultIndex), table => table
+                .Column<string>("ExecutionId")
+                .Column<string>("StepId")
+                .Column<string>("StepName")
+                .Column<string>("RecipeName")
+            );
+
+            return 1;
         }
     }
 }
