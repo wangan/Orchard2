@@ -149,11 +149,11 @@ namespace Orchard.Setup.Services
             {
                 using (var store = environment.ServiceProvider.GetService<IStore>())
                 {
-                    store.InitializeAsync().Wait();
+                    store.InitializeAsync();
                 }
             }
 
-            using (var environment = _shellContextFactory.CreateDescribedContext(shellSettings, shellDescriptor))
+            using (var environment = _shellContextFactory.CreateShellContext(shellSettings))
             {
                 var dataMigrationManager = environment.ServiceProvider.GetService<IDataMigrationManager>();
                 dataMigrationManager.UpdateAsync("Settings");

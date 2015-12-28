@@ -27,19 +27,16 @@ namespace Orchard.Environment.Shell.Builders
 
         ShellContext IShellContextFactory.CreateShellContext(ShellSettings settings)
         {
-            var sw = Stopwatch.StartNew();
             if (_logger.IsEnabled(LogLevel.Information))
             {
                 _logger.LogInformation("Creating shell context for tenant {0}", settings.Name);
             }
 
             var knownDescriptor = MinimumShellDescriptor();
-            var blueprint = _compositionStrategy.Compose(settings, knownDescriptor);
-            var provider = _shellContainerFactory.CreateContainer(settings, blueprint);
-
-            var shellDescriptorManager = provider.GetService<IShellDescriptorManager>();
-            var currentDescriptor = shellDescriptorManager.GetShellDescriptor().Result;
-
+            var initialContext = CreateDescribedContext(settings, knownDescriptor);
+            var shellDescriptorManager = initialContext.ServiceProvider.GetService<IShellDescriptorManager>();
+            ShellDescriptor currentDescriptor = shellDescriptorManager.GetShellDescriptor().Result;
+            
             if (currentDescriptor != null && knownDescriptor.SerialNumber != currentDescriptor.SerialNumber)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
@@ -47,33 +44,11 @@ namespace Orchard.Environment.Shell.Builders
                     _logger.LogInformation("Newer descriptor obtained. Rebuilding shell container.");
                 }
 
-                blueprint = _compositionStrategy.Compose(settings, currentDescriptor);
-                (provider as IDisposable).Dispose();
-                provider = _shellContainerFactory.CreateContainer(settings, blueprint);
+                initialContext.Dispose();
+                return CreateDescribedContext(settings, currentDescriptor);
             }
 
-            try
-            {
-                var shellcontext = new ShellContext
-                {
-                    Settings = settings,
-                    Blueprint = blueprint,
-                    ServiceProvider = provider,
-                };
-
-                if (_logger.IsEnabled(LogLevel.Verbose))
-                {
-                    _logger.LogVerbose("Created shell context for tenant {0} in {1}ms", settings.Name, sw.ElapsedMilliseconds);
-                }
-                sw.Stop();
-                return shellcontext;
-            }
-            catch (Exception ex)
-            {
-                sw.Stop();
-                _logger.LogError("Cannot create shell context", ex);
-                throw;
-            }
+            return initialContext;
         }
         
         ShellContext IShellContextFactory.CreateSetupContext(ShellSettings settings)
@@ -92,15 +67,7 @@ namespace Orchard.Environment.Shell.Builders
                 },
             };
 
-            var blueprint = _compositionStrategy.Compose(settings, descriptor);
-            var provider = _shellContainerFactory.CreateContainer(settings, blueprint);
-
-            return new ShellContext
-            {
-                Settings = settings,
-                Blueprint = blueprint,
-                ServiceProvider = provider
-            };
+            return CreateDescribedContext(settings, descriptor);
         }
 
         public ShellContext CreateDescribedContext(ShellSettings settings, ShellDescriptor shellDescriptor)
@@ -134,6 +101,5 @@ namespace Orchard.Environment.Shell.Builders
                 Parameters = new List<ShellParameter>()
             };
         }
-
     }
 }

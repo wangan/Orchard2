@@ -147,7 +147,7 @@ namespace Orchard.Data.Migration
 
             // proceed with dependent features first, whatever the module it's in
             var dependencies = _extensionManager.AvailableFeatures()
-                .Where(f => String.Equals(f.Id, feature, StringComparison.OrdinalIgnoreCase))
+                .Where(f => string.Equals(f.Id, feature, StringComparison.OrdinalIgnoreCase))
                 .Where(f => f.Dependencies != null)
                 .SelectMany(f => f.Dependencies)
                 .ToList();
