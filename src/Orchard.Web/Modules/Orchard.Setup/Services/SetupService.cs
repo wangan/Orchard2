@@ -153,7 +153,7 @@ namespace Orchard.Setup.Services
                 }
             }
 
-            using (var environment = _shellContextFactory.CreateShellContext(shellSettings))
+            using (var environment = _orchardHost.CreateShellContext(shellSettings))
             {
                 var dataMigrationManager = environment.ServiceProvider.GetService<IDataMigrationManager>();
                 dataMigrationManager.UpdateAsync("Settings");
@@ -173,7 +173,7 @@ namespace Orchard.Setup.Services
             while (_processingEngine.AreTasksPending())
                 _processingEngine.ExecuteNextTask();
 
-            using (var environment = _shellContextFactory.CreateShellContext(shellSettings))
+            using (var environment = _orchardHost.CreateShellContext(shellSettings))
             {
                 executionId = CreateTenantData(context, environment);
             }

@@ -1,7 +1,5 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics;
 using Orchard.Hosting.ShellBuilders;
 using Orchard.Environment.Shell.Descriptor.Models;
 using System.Collections.Generic;
