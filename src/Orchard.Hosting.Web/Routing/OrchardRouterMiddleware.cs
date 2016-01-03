@@ -4,7 +4,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orchard.Environment.Shell;
+using Orchard.Hosting.Routing;
 
 namespace Orchard.Hosting.Web.Routing
 {
@@ -28,13 +28,8 @@ namespace Orchard.Hosting.Web.Routing
                 _logger.LogInformation("Begin Routing Request");
             }
 
-            var shellSettings = httpContext.RequestServices.GetService<ShellSettings>();
-            var routerTable = httpContext.RequestServices.GetService<IRunningShellRouterTable>();
-
-            var router = routerTable.GetOrAdd(
-                shellSettings.Name, 
-                name => httpContext.RequestServices.GetService<IRouteBuilder>().Build()
-            );
+            var routerManager = httpContext.RequestServices.GetService<IRunningShellRouterManager>();
+            var router = routerManager.GetCurrent();
 
             var context = new RouteContext(httpContext);
             context.RouteData.Routers.Add(router);

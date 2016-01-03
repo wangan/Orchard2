@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.OptionsModel;
+using Orchard.Events;
 using Orchard.FileSystem.AppData;
 using Orchard.Parser;
 using Orchard.Parser.Yaml;
@@ -13,6 +14,7 @@ namespace Orchard.Environment.Shell
     {
         private readonly IAppDataFolder _appDataFolder;
         //private readonly ICache _cache;
+        private readonly IEventBus _eventBus;
         private readonly IOptions<ShellOptions> _optionsAccessor;
         private readonly ILogger _logger;
 
@@ -21,10 +23,12 @@ namespace Orchard.Environment.Shell
         public ShellSettingsManager(IAppDataFolder appDataFolder,
             //ICache cache,
             IOptions<ShellOptions> optionsAccessor,
+            IEventBus eventBus,
             ILogger<ShellSettingsManager> logger)
         {
             _appDataFolder = appDataFolder;
             //_cache = cache;
+            _eventBus = eventBus;
             _optionsAccessor = optionsAccessor;
             _logger = logger;
         }
@@ -90,6 +94,8 @@ namespace Orchard.Environment.Shell
             }
 
             configurationProvider.Commit();
+
+            _eventBus.NotifyAsync<IShellSettingsManagerEventHandler>(x => x.Saved(shellSettings)).Wait();
 
             if (_logger.IsEnabled(LogLevel.Information))
             {

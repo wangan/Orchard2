@@ -5,6 +5,7 @@ using Orchard.DependencyInjection;
 using Orchard.Environment.Shell;
 using Orchard.Hosting.Mvc;
 using Orchard.Hosting.Mvc.Routing;
+using Orchard.Hosting.Routing;
 using Orchard.Hosting.Routing.Routes;
 
 namespace Orchard.Hosting
@@ -25,6 +26,7 @@ namespace Orchard.Hosting
             serviceCollection.AddScoped<IOrchardShellEvents, OrchardShell>();
             serviceCollection.AddSingleton<IRunningShellRouterTable, DefaultRunningShellRouterTable>();
             serviceCollection.AddSingleton<IRouteBuilder, DefaultShellRouteBuilder>();
+            serviceCollection.AddScoped<IRunningShellRouterManager, DefaultRunningShellRouterManager>();
         }
     }
 }

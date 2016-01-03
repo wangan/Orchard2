@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Orchard.Events;
+using System.Collections.Generic;
 
 namespace Orchard.Environment.Shell
 {
@@ -15,5 +16,10 @@ namespace Orchard.Environment.Shell
         /// </summary>
         /// <param name="settings">The shell settings to store.</param>
         void SaveSettings(ShellSettings settings);
+    }
+
+    public interface IShellSettingsManagerEventHandler : IEventHandler
+    {
+        void Saved(ShellSettings settings);
     }
 }
