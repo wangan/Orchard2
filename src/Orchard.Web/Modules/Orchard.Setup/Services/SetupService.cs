@@ -144,7 +144,6 @@ namespace Orchard.Setup.Services
             // Creating a standalone environment.
             // In theory this environment can be used to resolve any normal components by interface, and those
             // components will exist entirely in isolation - no crossover between the safemode container currently in effect
-
             using (var environment = _shellContextFactory.CreateDescribedContext(shellSettings, shellDescriptor))
             {
                 using (var store = environment.ServiceProvider.GetService<IStore>())
@@ -153,7 +152,7 @@ namespace Orchard.Setup.Services
                 }
             }
 
-            using (var environment = _orchardHost.CreateShellContext(shellSettings))
+            using (var environment = _shellContextFactory.CreateDescribedContext(shellSettings, shellDescriptor))
             {
                 var dataMigrationManager = environment.ServiceProvider.GetService<IDataMigrationManager>();
                 dataMigrationManager.UpdateAsync("Settings");
