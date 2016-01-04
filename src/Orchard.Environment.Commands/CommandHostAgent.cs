@@ -140,7 +140,8 @@ namespace Orchard.Environment.Commands
             else
             {
                 // In case of an uninitialized site (no default settings yet), we create a default settings instance.
-                return _orchardHost.CreateShellContext(ShellHelper.BuildDefaultUninitializedShell);
+                var settings = new ShellSettings { Name = ShellHelper.DefaultShellName, State = TenantState.Uninitialized };
+                return _orchardHost.CreateShellContext(settings);
             }
         }
     }

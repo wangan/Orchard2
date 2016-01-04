@@ -48,6 +48,25 @@ namespace Orchard.Environment.Shell.Builders
 
             return initialContext;
         }
+        
+        ShellContext IShellContextFactory.CreateSetupContext(ShellSettings settings)
+        {
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug("No shell settings available. Creating shell context for setup");
+            }
+            var descriptor = new ShellDescriptor
+            {
+                SerialNumber = -1,
+                Features = new[] {
+                    new ShellFeature { Name = "Orchard.Logging.Console" },
+                    new ShellFeature { Name = "Orchard.Setup" },
+                    new ShellFeature { Name = "Orchard.Recipes" }
+                },
+            };
+
+            return CreateDescribedContext(settings, descriptor);
+        }
 
         public ShellContext CreateDescribedContext(ShellSettings settings, ShellDescriptor shellDescriptor)
         {

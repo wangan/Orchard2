@@ -7,6 +7,7 @@ namespace Orchard.Hosting
     {
         void Initialize();
         ShellContext GetShellContext(ShellSettings settings);
+        void UpdateShellSettings(ShellSettings settings);
         ShellContext CreateShellContext(ShellSettings settings);
     }
 }
