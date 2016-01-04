@@ -31,13 +31,13 @@ namespace Orchard.Hosting.ShellBuilders
             {
                 if (disposing)
                 {
+                    // Disposes all the services registered for this shell
+                    (ServiceProvider as IDisposable).Dispose();
                 }
 
                 Settings = null;
                 Blueprint = null;
 
-                // Disposes all the services registered for this shell
-                (ServiceProvider as IDisposable).Dispose();
                 IsActivated = false;
 
                 _disposed = true;

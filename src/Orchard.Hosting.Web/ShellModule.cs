@@ -17,9 +17,6 @@ namespace Orchard.Hosting
     {
         public void Configure(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddLogging();
-            serviceCollection.AddOptions();
-
             serviceCollection.AddOrchardMvc();
             serviceCollection.AddDataAccess();
 
