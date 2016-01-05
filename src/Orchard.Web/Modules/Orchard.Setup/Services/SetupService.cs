@@ -101,8 +101,6 @@ namespace Orchard.Setup.Services
 
         public string SetupInternal(SetupContext context)
         {
-            string executionId;
-
             if (_logger.IsEnabled(LogLevel.Information))
             {
                 _logger.LogInformation("Running setup for tenant '{0}'.", _shellSettings.Name);
@@ -154,24 +152,27 @@ namespace Orchard.Setup.Services
 
             using (var environment = _shellContextFactory.CreateDescribedContext(shellSettings, shellDescriptor))
             {
-                var dataMigrationManager = environment.ServiceProvider.GetService<IDataMigrationManager>();
-                dataMigrationManager.UpdateAsync("Settings");
+                environment
+                    .ServiceProvider
+                    .GetService<IDataMigrationManager>()
+                    .UpdateAsync(context.EnabledFeatures);
 
-                foreach (var feature in context.EnabledFeatures)
-                {
-                    dataMigrationManager.UpdateAsync(feature);
-                }
-
-                environment.ServiceProvider.GetService<IShellDescriptorManager>().UpdateShellDescriptor(
-                    0,
-                    shellDescriptor.Features,
-                    shellDescriptor.Parameters);
+                environment
+                    .ServiceProvider
+                    .GetService<IShellDescriptorManager>()
+                    .UpdateShellDescriptor(
+                        0,
+                        shellDescriptor.Features,
+                        shellDescriptor.Parameters);
             }
 
             // In effect "pump messages" see PostMessage circa 1980.
             while (_processingEngine.AreTasksPending())
+            {
                 _processingEngine.ExecuteNextTask();
+            }
 
+            string executionId;
             using (var environment = _orchardHost.CreateShellContext(shellSettings))
             {
                 executionId = CreateTenantData(context, environment);

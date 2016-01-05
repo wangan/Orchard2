@@ -30,7 +30,7 @@ namespace Orchard.Hosting.Web.Routing
             }
 
             var shellSettings = httpContext.RequestServices.GetService<ShellSettings>();
-            var routerTable = httpContext.ApplicationServices.GetService<IRunningShellRouterTable>();
+            var routerTable = httpContext.RequestServices.GetService<IRunningShellRouterTable>();
 
             var router = routerTable.GetOrAdd(
                 shellSettings.Name, 

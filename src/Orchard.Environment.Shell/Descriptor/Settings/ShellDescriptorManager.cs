@@ -28,9 +28,9 @@ namespace Orchard.Environment.Shell.Descriptor.Settings
             _logger = logger;
         }
 
-        public Task<ShellDescriptor> GetShellDescriptor()
+        public async Task<ShellDescriptor> GetShellDescriptor()
         {
-            return _session.QueryAsync<ShellDescriptor>().FirstOrDefault();
+            return await _session.QueryAsync<ShellDescriptor>().FirstOrDefault();
         }
 
         public async Task UpdateShellDescriptor(int priorSerialNumber, IEnumerable<ShellFeature> enabledFeatures, IEnumerable<ShellParameter> parameters)
