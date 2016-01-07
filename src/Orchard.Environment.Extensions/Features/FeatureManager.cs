@@ -12,6 +12,8 @@ namespace Orchard.Environment.Extensions.Features
 {
     public class FeatureManager : IFeatureManager
     {
+        public const string FeatureManagerCacheKey = "FeatureManager:Features";
+
         private readonly IExtensionManager _extensionManager;
         private readonly IShellDescriptorManager _shellDescriptorManager;
         private readonly ILogger _logger;
@@ -24,12 +26,13 @@ namespace Orchard.Environment.Extensions.Features
         public FeatureManager(
             IExtensionManager extensionManager,
             IShellDescriptorManager shellDescriptorManager,
-            ILogger<FeatureManager> logger)
+            ILogger<FeatureManager> logger
+            )
         {
             _extensionManager = extensionManager;
             _shellDescriptorManager = shellDescriptorManager;
             _logger = logger;
-
+            
             T = NullLocalizer.Instance;
         }
 

@@ -16,30 +16,32 @@ namespace Orchard.DynamicCache.Services
     /// Caches shapes in the default <see cref="IDistributedCache"/> implementation.
     /// It uses the shape's metadata cache context to define the cache parameters.
     /// </summary>
-    public class DynamicCacheShapeDisplayEvents : IShapeDisplayEvents
+    public class DynamicCacheShapeDisplayEvents : IShapeDisplayEvents, ITagRemovedEventHandler
     {
         private static char ContextSeparator = ';';
 
-        private readonly IDistributedCache _distributedMemoryCache;
         private readonly ICacheContextManager _cacheContextManager;
         private readonly HashSet<ShapeMetadataCacheContext> _cached = new HashSet<ShapeMetadataCacheContext>();
         private readonly Dictionary<string, string> _cache = new Dictionary<string, string>();
+        private readonly IDynamicCache _dynamicCache;
+        private readonly ITagCache _tagCache;
 
         public DynamicCacheShapeDisplayEvents(
-            IDistributedCache distributedMemoryCache,
+            IDynamicCache dynamicCache,
+            ITagCache tagCache,
             ICacheContextManager cacheContextManager)
         {
-            _distributedMemoryCache = distributedMemoryCache;
+            _dynamicCache = dynamicCache;
+            _tagCache = tagCache;
             _cacheContextManager = cacheContextManager;
         }
 
         public void Displaying(ShapeDisplayingContext context)
         {
-            var cacheContext = context.ShapeMetadata.CacheContext;
-
-            if (!String.IsNullOrEmpty(cacheContext.CacheId) && context.ChildContent == null)
+            if (context.ShapeMetadata.IsCached && context.ChildContent == null)
             {
-                var cacheEntries = GetCacheEntries(context.ShapeMetadata.CacheContext).ToList();
+                var cacheContext = context.ShapeMetadata.Cache();
+                var cacheEntries = GetCacheEntries(cacheContext).ToList();
                 string cacheKey = GetCacheKey(cacheContext.CacheId, cacheEntries);
 
                 var content = GetDistributedCache(cacheKey);
@@ -59,10 +61,10 @@ namespace Orchard.DynamicCache.Services
         {
             // TODO: Configure duration of sliding expiration
 
-            var cacheContext = context.ShapeMetadata.CacheContext;
+            var cacheContext = context.ShapeMetadata.Cache();
 
             // If the shape is not cached, evaluate the ESIs
-            if(String.IsNullOrEmpty(cacheContext.CacheId))
+            if(cacheContext == null)
             {
                 string content;
                 using (var sw = new StringWriter())
@@ -76,7 +78,7 @@ namespace Orchard.DynamicCache.Services
             }
             else if (!_cached.Contains(cacheContext) && context.ChildContent != null)
             {
-                var cacheEntries = GetCacheEntries(context.ShapeMetadata.CacheContext).ToList();
+                var cacheEntries = GetCacheEntries(cacheContext).ToList();
                 string cacheKey = GetCacheKey(cacheContext.CacheId, cacheEntries);
 
                 using (var sw = new StringWriter())
@@ -86,7 +88,7 @@ namespace Orchard.DynamicCache.Services
 
                     _cached.Add(cacheContext);
                     _cache[cacheKey] = content;
-                    var contexts = String.Join(";", cacheContext.Contexts.ToArray());
+                    var contexts = String.Join(ContextSeparator.ToString(), cacheContext.Contexts.ToArray());
                     context.ChildContent = new HtmlString($"[[cache id='{cacheContext.CacheId}' contexts='{contexts}']]");
 
                     var bytes = Encoding.UTF8.GetBytes(content);
@@ -106,7 +108,8 @@ namespace Orchard.DynamicCache.Services
                         };
                     }
 
-                    _distributedMemoryCache.Set(cacheKey, bytes, options);
+                    _dynamicCache.SetAsync(cacheKey, bytes, options).Wait();
+                    _tagCache.Tag(cacheKey, cacheContext.Tags.ToArray());
                 }
             }
 
@@ -122,12 +125,6 @@ namespace Orchard.DynamicCache.Services
         {
             // All contexts' entries
             foreach(var entry in GetCacheEntries(cacheContext.Contexts))
-            {
-                yield return entry;
-            }
-
-            // All dependencies
-            foreach(var entry in cacheContext.Dependencies)
             {
                 yield return entry;
             }
@@ -191,13 +188,21 @@ namespace Orchard.DynamicCache.Services
                 return content;
             }
 
-            var bytes = _distributedMemoryCache.Get(cacheKey);
+            var bytes = _dynamicCache.GetAsync(cacheKey).Result;
             if (bytes == null)
             {
                 return null;
             }
 
             return Encoding.UTF8.GetString(bytes);
+        }
+
+        public void TagRemoved(string tag, IEnumerable<string> keys)
+        {
+            foreach (var key in keys)
+            {
+                _dynamicCache.RemoveAsync(key);
+            }
         }
     }
 }

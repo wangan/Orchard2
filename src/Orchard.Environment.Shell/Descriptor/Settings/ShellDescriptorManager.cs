@@ -85,8 +85,7 @@ namespace Orchard.Environment.Shell.Descriptor.Settings
                 _logger.LogInformation("Shell descriptor updated for shell '{0}'.", _shellSettings.Name);
             }
 
-            await _eventBus.NotifyAsync<IShellDescriptorManagerEventHandler>(
-                e => e.Changed(shellDescriptorRecord, _shellSettings.Name));
+            await _eventBus.NotifyAsync<IShellDescriptorManagerEventHandler>(e => e.Changed(shellDescriptorRecord, _shellSettings.Name));
         }
     }
 }
