@@ -19,7 +19,6 @@ namespace Orchard.Hosting
             serviceCollection.AddLogging();
             serviceCollection.AddOptions();
 
-            //serviceCollection.AddOrchardMvc();
             serviceCollection.AddDataAccess();
 
             serviceCollection.AddScoped<IOrchardShellEvents, OrchardShell>();

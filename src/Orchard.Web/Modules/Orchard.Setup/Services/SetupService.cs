@@ -18,6 +18,7 @@ using Orchard.Hosting.ShellBuilders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using YesSql.Core.Services;
 
 namespace Orchard.Setup.Services
@@ -90,7 +91,7 @@ namespace Orchard.Setup.Services
             var initialState = _shellSettings.State;
             try
             {
-                return SetupInternal(context);
+                return SetupInternalAsync(context).Result;
             }
             catch
             {
@@ -99,7 +100,7 @@ namespace Orchard.Setup.Services
             }
         }
 
-        public string SetupInternal(SetupContext context)
+        public async Task<string> SetupInternalAsync(SetupContext context)
         {
             if (_logger.IsEnabled(LogLevel.Information))
             {
@@ -108,14 +109,12 @@ namespace Orchard.Setup.Services
 
             // Features to enable for Setup
             string[] hardcoded = {
-                // Logging
                 "Orchard.Logging.Console",
-                // Framework
                 "Orchard.Hosting",
-                // Core
                 "Settings",
-                // Modules
-                "Orchard.Modules", "Orchard.Themes", "Orchard.Recipes"
+                "Orchard.Modules",
+                "Orchard.Themes",
+                "Orchard.Recipes"
                 };
 
             context.EnabledFeatures = hardcoded.Union(context.EnabledFeatures ?? Enumerable.Empty<string>()).Distinct().ToList();
@@ -139,28 +138,24 @@ namespace Orchard.Setup.Services
                 Features = context.EnabledFeatures.Select(name => new ShellFeature { Name = name }).ToList()
             };
 
-            // Creating a standalone environment.
-            // In theory this environment can be used to resolve any normal components by interface, and those
-            // components will exist entirely in isolation - no crossover between the safemode container currently in effect
-            using (var environment = _shellContextFactory.CreateDescribedContext(shellSettings, shellDescriptor))
-            {
-                using (var store = environment.ServiceProvider.GetService<IStore>())
-                {
-                    store.InitializeAsync();
-                }
-            }
+            var shellContext = _shellContextFactory.CreateDescribedContext(shellSettings, shellDescriptor);
 
-            using (var environment = _shellContextFactory.CreateDescribedContext(shellSettings, shellDescriptor))
+            using (var environment = shellContext.CreateServiceScope())
             {
-                environment
+                var store = environment.ServiceProvider.GetService<IStore>();
+                await store.InitializeAsync();
+
+                // Give the chance for Setup default modules to run their migration
+                await environment
                     .ServiceProvider
                     .GetService<IDataMigrationManager>()
                     .UpdateAsync(context.EnabledFeatures);
 
-                environment
+                // Create the shell descriptor
+                await environment
                     .ServiceProvider
                     .GetService<IShellDescriptorManager>()
-                    .UpdateShellDescriptor(
+                    .UpdateShellDescriptorAsync(
                         0,
                         shellDescriptor.Features,
                         shellDescriptor.Parameters);

@@ -34,8 +34,8 @@ namespace Orchard.Environment.Recipes.Services
 
         private async void UpdateShell()
         {
-            var descriptor = await _shellDescriptorManager.GetShellDescriptor();
-            await _shellDescriptorManager.UpdateShellDescriptor(
+            var descriptor = await _shellDescriptorManager.GetShellDescriptorAsync();
+            await _shellDescriptorManager.UpdateShellDescriptorAsync(
                 descriptor.SerialNumber, descriptor.Features, descriptor.Parameters);
         }
     }

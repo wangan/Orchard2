@@ -16,14 +16,14 @@ namespace Orchard.Environment.Shell.Descriptor
         /// the current "correct" configuration. The host will use this information
         /// to reinitialize the shell.
         /// </summary>
-        Task<ShellDescriptor> GetShellDescriptor();
+        Task<ShellDescriptor> GetShellDescriptorAsync();
 
         /// <summary>
         /// Alters databased information to match information passed as arguments.
         /// Prior SerialNumber used for optimistic concurrency, and an exception
         /// should be thrown if the number in storage doesn't match what's provided.
         /// </summary>
-        Task UpdateShellDescriptor(
+        Task UpdateShellDescriptorAsync(
             int priorSerialNumber,
             IEnumerable<ShellFeature> enabledFeatures,
             IEnumerable<ShellParameter> parameters);

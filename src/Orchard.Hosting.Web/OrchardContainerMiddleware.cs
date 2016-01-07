@@ -6,6 +6,7 @@ using Orchard.Environment.Shell;
 using Orchard.Hosting.ShellBuilders;
 using Microsoft.Extensions.DependencyInjection;
 using Orchard.Events;
+using System;
 
 namespace Orchard.Hosting
 {
@@ -44,9 +45,7 @@ namespace Orchard.Hosting
                 ShellContext shellContext = _orchardHost.GetShellContext(shellSetting);
                 httpContext.ApplicationServices = shellContext.ServiceProvider;
 
-                var scope = shellContext.ServiceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-
-                using (scope)
+                using (var scope = shellContext.CreateServiceScope())
                 {
                     httpContext.RequestServices = scope.ServiceProvider;
 

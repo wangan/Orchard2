@@ -165,7 +165,7 @@ namespace Orchard.Data.Migration
                 // Create a new transaction for this migration
                 //await _session.CommitAsync();
 
-                await _store.ExecuteMigrationAsync(async schemaBuilder =>
+                _store.ExecuteMigration(schemaBuilder =>
                 {
                     migration.SchemaBuilder = schemaBuilder;
 
@@ -173,7 +173,7 @@ namespace Orchard.Data.Migration
                     var tempMigration = migration;
 
                     // get current version for this migration
-                    var dataMigrationRecord = await GetDataMigrationRecordAsync(tempMigration);
+                    var dataMigrationRecord = GetDataMigrationRecordAsync(tempMigration).Result;
 
                     var current = 0;
                     if (dataMigrationRecord != null)

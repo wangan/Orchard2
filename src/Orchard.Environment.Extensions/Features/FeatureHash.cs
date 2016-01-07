@@ -32,7 +32,7 @@ namespace Orchard.Environment.Extensions.Features
 
             // Calculate a hash of all enabled features' name
             serial = _featureManager
-                .GetEnabledFeatures()
+                .GetEnabledFeatures().Result
                 .OrderBy(x => x.Name)
                 .Aggregate(0, (a, f) => a * 7 + f.Name.GetHashCode());
 
@@ -51,7 +51,7 @@ namespace Orchard.Environment.Extensions.Features
             if (!_memoryCache.TryGetValue(cacheKey, out enabled))
             {
                 enabled = _featureManager
-                    .GetEnabledFeatures()
+                    .GetEnabledFeatures().Result
                     .Any(x => x.Name.Equals(featureId));
 
                 var options = new MemoryCacheEntryOptions()

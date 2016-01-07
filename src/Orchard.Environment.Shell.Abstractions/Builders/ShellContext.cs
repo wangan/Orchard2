@@ -2,6 +2,7 @@
 using Orchard.Environment.Shell.Builders.Models;
 using Orchard.Environment.Shell;
 using Orchard.Environment.Shell.Descriptor.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Orchard.Hosting.ShellBuilders
 {
@@ -23,6 +24,14 @@ namespace Orchard.Hosting.ShellBuilders
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Creates a standalone service scope that can be used to resolve local services.
+        /// </summary>
+        public IServiceScope CreateServiceScope()
+        {
+            return ServiceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
         }
 
         protected virtual void Dispose(bool disposing)

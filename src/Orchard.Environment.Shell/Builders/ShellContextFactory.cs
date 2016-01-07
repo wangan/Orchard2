@@ -33,7 +33,7 @@ namespace Orchard.Environment.Shell.Builders
             var knownDescriptor = MinimumShellDescriptor();
             var initialContext = CreateDescribedContext(settings, knownDescriptor);
             var shellDescriptorManager = initialContext.ServiceProvider.GetService<IShellDescriptorManager>();
-            ShellDescriptor currentDescriptor = shellDescriptorManager.GetShellDescriptor().Result;
+            ShellDescriptor currentDescriptor = shellDescriptorManager.GetShellDescriptorAsync().Result;
             
             if (currentDescriptor != null && knownDescriptor.SerialNumber != currentDescriptor.SerialNumber)
             {

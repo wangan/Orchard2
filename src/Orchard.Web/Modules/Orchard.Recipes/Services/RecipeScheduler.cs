@@ -53,7 +53,7 @@ namespace Orchard.Recipes.Services
 
                     // Because recipes execute in their own workcontext, we need to restart the shell, as signaling a cache won't work across workcontexts.
                     _events.NotifyAsync<IShellDescriptorManagerEventHandler>(e => e.Changed(
-                        _shellDescriptorManager.GetShellDescriptor().Result, 
+                        _shellDescriptorManager.GetShellDescriptorAsync().Result, 
                         _shellSettings.Name));
                 }
             }
@@ -65,7 +65,7 @@ namespace Orchard.Recipes.Services
 
         public void ScheduleWork(string executionId)
         {
-            var shellDescriptor = _shellDescriptorManager.GetShellDescriptor().Result;
+            var shellDescriptor = _shellDescriptorManager.GetShellDescriptorAsync().Result;
 
             _processingEngine.AddTask(
                 _shellSettings,

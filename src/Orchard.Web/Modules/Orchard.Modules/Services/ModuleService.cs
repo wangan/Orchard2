@@ -54,7 +54,7 @@ namespace Orchard.Modules.Services
         /// <returns>An enumeration of the available features together with its state (enabled / disabled).</returns>
         public async Task<IEnumerable<ModuleFeature>> GetAvailableFeatures()
         {
-            var enabledFeatures = (await _shellDescriptorManager.GetShellDescriptor()).Features;
+            var enabledFeatures = (await _shellDescriptorManager.GetShellDescriptorAsync()).Features;
             return _extensionManager.AvailableExtensions()
                 .SelectMany(m => _extensionManager.LoadFeatures(m.Features))
                 .Select(f => AssembleModuleFromDescriptor(f, enabledFeatures

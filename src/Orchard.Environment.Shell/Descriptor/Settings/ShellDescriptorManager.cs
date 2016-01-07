@@ -28,14 +28,14 @@ namespace Orchard.Environment.Shell.Descriptor.Settings
             _logger = logger;
         }
 
-        public async Task<ShellDescriptor> GetShellDescriptor()
+        public async Task<ShellDescriptor> GetShellDescriptorAsync()
         {
             return await _session.QueryAsync<ShellDescriptor>().FirstOrDefault();
         }
 
-        public async Task UpdateShellDescriptor(int priorSerialNumber, IEnumerable<ShellFeature> enabledFeatures, IEnumerable<ShellParameter> parameters)
+        public async Task UpdateShellDescriptorAsync(int priorSerialNumber, IEnumerable<ShellFeature> enabledFeatures, IEnumerable<ShellParameter> parameters)
         {
-            var shellDescriptorRecord = await GetShellDescriptor();
+            var shellDescriptorRecord = await GetShellDescriptorAsync();
             var serialNumber = shellDescriptorRecord == null ? 0 : shellDescriptorRecord.SerialNumber;
             if (priorSerialNumber != serialNumber)
             {
